@@ -126,7 +126,8 @@ int deepOfTree(Node *root)
 	return deep;
 }
 
-//拷贝二叉树
+//递归实现拷贝二叉树
+//拷贝是从左子树的最底层的叶子节点开始拷贝，拷贝完两个叶子节点，再拷贝父节点
 Node *copyBinTree(Node *root)
 {
 	if(root == NULL)
