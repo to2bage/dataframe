@@ -4,14 +4,92 @@
 
 #include "btree.h"
 
+void midOrderDG(TNode *root)
+{
+	if(root == NULL)
+	{
+		return;
+	}
+
+	if(root->lchild)
+	{
+		midOrderDG(root->lchild);
+	}
+
+	printf("%4d", root->data);
+
+	if(root->rchild)
+	{
+		midOrderDG(root->rchild);
+	}
+}
+
+//找到中序遍历的左子树的开始位置
+TNode *goLeft(Node **pphead, TNode *root)
+{
+	if(root == NULL)
+	{
+		return NULL;
+	}
+	TNode *px = root;
+	while(1)
+	{
+		if(px->lchild)
+		{
+			//如果节点有左子树，将该节点入栈
+			push(pphead, px);	
+			px = px->lchild;
+		}
+		else if(px->lchild == NULL)
+		{
+			//printf("isEmpty(phead) == %d\n", isEmpty(*pphead));
+			return px;	
+		}
+	}	
+}
+
+void midOrder(TNode *root)
+{
+	//定义栈
+	Node *phead = NULL;
+	TNode *pleft = goLeft(&phead, root);
+	//printf("isEmpty(phead) == %d\n", isEmpty(phead));
+	while(1)
+	{
+		printf("%4d\n", pleft->data);
+		if(pleft->rchild)
+		{
+			//如果右子树存在
+			//printf("a\n");
+			pleft = goLeft(&phead, pleft->rchild);	
+		}
+		else if(pleft->rchild == NULL && isEmpty(phead) == 1)
+		{
+			//如果没有右子树，并且栈不为空
+			//弹出栈顶节点
+			//printf("b\n");
+			pleft = top(phead);
+			pop(&phead);
+		}
+		else if(pleft->rchild == NULL && isEmpty(phead) == 0)
+		{
+			//如果没有右子树，并且栈为空
+			//退出while循环
+			//printf("c\n");	
+			pleft = NULL;
+			break;
+		}
+	}		
+}
+
 #if 1
-Node *push(Node *phead, TNode *pTNode)
+void push(Node **pphead, TNode *pTNode)
 {
 	Node *pnew = (Node *)malloc(sizeof(Node));
 	if(pnew == NULL)
 	{
 		printf("malloc error\n");
-		return phead;
+		return ;
 	}	
 	memset(pnew, 0, sizeof(Node));
 	pnew->pTNode = (TNode *)malloc(sizeof(TNode));
@@ -20,32 +98,30 @@ Node *push(Node *phead, TNode *pTNode)
 	pnew->pTNode->rchild = pTNode->rchild;
 	pnew->pNext = NULL;
 
-	if(phead == NULL)
+	if(*pphead == NULL)
 	{
-		phead = pnew;
+		*pphead = pnew;
 	}
 	else
 	{
-		pnew->pNext = phead;
-		phead = pnew;
+		pnew->pNext = *pphead;
+		*pphead = pnew;
 	}
-	return phead;	
 }
 
-Node *pop(Node *phead)
+void pop(Node **pphead)
 {
-	if(phead == NULL)
+	if(*pphead == NULL)
 	{
-		return phead;
+		return; 
 	}
-	Node *pdeletenode = phead;
-	phead = phead->pNext;
+	Node *pdeletenode = *pphead;
+	*pphead = (*pphead)->pNext;
 	free(pdeletenode->pTNode);
 	pdeletenode->pTNode = NULL;
 	free(pdeletenode);
 	pdeletenode = NULL; 
 	
-	return phead;
 }
 
 TNode *top(Node *phead)
